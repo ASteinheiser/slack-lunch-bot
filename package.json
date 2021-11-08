@@ -1,0 +1,11 @@
+{
+  "name": "slack-lunch-bot",
+  "version": "1.0.0",
+  "description": "Slack bot for helping the team place lunch orders",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Andrew Steinheiser <me@iamandrew.io>",
+  "license": "MIT"
+}
