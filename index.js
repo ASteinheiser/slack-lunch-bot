@@ -1,17 +1,22 @@
-// const { Botkit } = require('botkit');
+const { Botkit } = require('botkit');
+const { SlackAdapter } = require('botbuilder-adapter-slack');
 const dotenv = require('dotenv');
 
 dotenv.config();
 
-// const controller = new Botkit();
-
-// controller.hears('hello','direct_message', function(bot, message) {
-//   bot.reply(message,'Hello yourself!');
-// });
-
-const { CLIENT_ID, CLIENT_SECRET, CLIENT_SIGNING_SECRET, VERIFICATION_TOKEN, PORT, BOT_TOKEN } = process.env;
-
-if (!CLIENT_ID || !CLIENT_SECRET || !CLIENT_SIGNING_SECRET || !VERIFICATION_TOKEN || !PORT || !BOT_TOKEN) {
-  console.log('Error: Specify CLIENT_ID, CLIENT_SECRET, CLIENT_SIGNING_SECRET, VERIFICATION_TOKEN, PORT and BOT_TOKEN in environment');
+const { CLIENT_SIGNING_SECRET, BOT_TOKEN } = process.env;
+if (!CLIENT_SIGNING_SECRET || !BOT_TOKEN) {
+  console.log('Error: Specify CLIENT_SIGNING_SECRET and BOT_TOKEN in environment');
   process.exit(1);
 }
+
+const adapter = new SlackAdapter({
+  clientSigningSecret: CLIENT_SIGNING_SECRET,
+  botToken: BOT_TOKEN
+});
+
+const controller = new Botkit({ adapter });
+
+controller.on('message', async (bot, message) => {
+  await bot.reply(message, 'I heard a message!');
+});
