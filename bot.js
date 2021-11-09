@@ -12,17 +12,19 @@ const { BotkitCMSHelper } = require('botkit-plugin-cms');
 
 const { SlackAdapter, SlackMessageTypeMiddleware, SlackEventMiddleware } = require('botbuilder-adapter-slack');
 
-const { MongoDbStorage } = require('botbuilder-storage-mongodb');
+// const { MongoDbStorage } = require('botbuilder-storage-mongodb');
+
+const slackFeatures = require('./features/slack_features');
 
 // Load process.env values from .env file
 require('dotenv').config();
 
 let storage = null;
-if (process.env.MONGO_URI) {
-    storage = mongoStorage = new MongoDbStorage({
-        url : process.env.MONGO_URI,
-    });
-}
+// if (process.env.MONGO_URI) {
+//     storage = mongoStorage = new MongoDbStorage({
+//         url : process.env.MONGO_URI,
+//     });
+// }
 
 
 
@@ -92,18 +94,11 @@ controller.ready(() => {
 
 });
 
-
+slackFeatures(controller);
 
 controller.webserver.get('/', (req, res) => {
-
     res.send(`This app is running Botkit ${ controller.version }.`);
-
 });
-
-
-
-
-
 
 controller.webserver.get('/install', (req, res) => {
     // getInstallLink points to slack's oauth endpoint and includes clientId and scopes
