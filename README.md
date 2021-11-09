@@ -26,7 +26,7 @@ yarn
 
 Start the bot locally:
 ```
-yarn start
+yarn dev
 ```
 
 Host it with [`ngrok`](https://ngrok.com/) (replace 3000 with your `PORT`):
