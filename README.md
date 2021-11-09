@@ -24,6 +24,11 @@ Install dependencies:
 yarn
 ```
 
+Run a local mongo instance with docker:
+```
+docker-compose up --build
+```
+
 Start the bot locally:
 ```
 yarn dev
@@ -34,7 +39,7 @@ Host it with [`ngrok`](https://ngrok.com/) (replace 3000 with your `PORT`):
 ngrok http 3000
 ```
 
-Now you can copy the `Forwarding` address, append `/api/messages` to it, and paste it in the `Request URL` of your `Slash Command`. The URL should look something like this:
+Now you can copy the `Forwarding` address, append `/api/messages` to it, and paste it in the `Request URL` of your `Slash Command` and `Interactivity` sections in the Slack App Config. The URL should look something like this:
 ```
 http://xx-xx-xx.ngrok.io/api/messages
 ```
