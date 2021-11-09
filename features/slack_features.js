@@ -7,63 +7,61 @@ function slackFeatures(controller) {
     if (message.text === 'help') {
       await bot.replyPublic(message, 'Hey there :wink:\nYou can "schedule" a lunch order with `/lunchbot schedule`!');
     } else if (message.text === 'schedule') {
-      await bot.replyPublic(message, {
-        blocks: [
-          {
-            "type": "section",
-            "text": {
-              "type": "mrkdwn",
-              "text": "*Ler Ros*\n:star::star::star::star: 2082 reviews\n I would really recommend the  Yum Koh Moo Yang - Spicy lime dressing and roasted quick marinated pork shoulder, basil leaves, chili & rice powder."
-            },
-            "accessory": {
-              "type": "image",
-              "image_url": "https://s3-media2.fl.yelpcdn.com/bphoto/DawwNigKJ2ckPeDeDM7jAg/o.jpg",
-              "alt_text": "alt text for image"
-            }
-          },
-          {
-            "type": "divider"
-          },
-          {
-            "type": "actions",
-            "elements": [{
-                "type": "button",
-                "text": {
-                  "type": "plain_text",
-                  "text": "Farmhouse",
-                  "emoji": true
-                },
-                "value": "Farmhouse"
-              },
-              {
-                "type": "button",
-                "text": {
-                  "type": "plain_text",
-                  "text": "Kin Khao",
-                  "emoji": true
-                },
-                "value": "Kin Khao"
-              },
-              {
-                "type": "button",
-                "text": {
-                  "type": "plain_text",
-                  "text": "Ler Ros",
-                  "emoji": true
-                },
-                "value": "Ler Ros"
-              }
-            ]
-          }
-        ]
-      });
+      await scheduleLunch(bot, message);
     } else {
       await bot.replyPublic(message, 'Invalid command, try `/lunchbot help`...');
     }
   });
 
   controller.on('block_actions', async (bot, message) => {
-    await bot.replyPublic(message, `Sounds like your choice is ${message.incoming_message.channelData.actions[0].value}`);
+    await bot.replyPublic(message, `Sounds like your choice is ${JSON.stringify(message.incoming_message.channelData.actions)}`);
+  });
+}
+
+const scheduleLunch = async (bot, message) => {
+  await bot.replyPublic(message, {
+    blocks: [
+      {
+        'type': 'section',
+        'text': {
+          'type': 'mrkdwn',
+          'text': '*What is for lunch today?*'
+        },
+      },
+      { 'type': 'divider' },
+      {
+        'type': 'input',
+        'element': { 'type': 'plain_text_input' },
+        'label': {
+          'type': 'plain_text',
+          'text': 'Restaurant name',
+        },
+        'dispatch_action': true
+      },
+      {
+        'type': 'input',
+        'element': { 'type': 'plain_text_input' },
+        'label': {
+          'type': 'plain_text',
+          'text': 'Link to menu',
+        },
+        'dispatch_action': true
+      },
+      {
+        'type': 'actions',
+        'elements': [
+          {
+            'type': 'button',
+            'style': 'primary',
+            'text': {
+              'type': 'plain_text',
+              'text': 'Submit',
+              'emoji': true
+            }
+          }
+        ]
+      }
+    ]
   });
 }
 
