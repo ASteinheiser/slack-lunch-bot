@@ -4,7 +4,7 @@
   "description": "Slack bot for helping the team place lunch orders",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
   "author": "Andrew Steinheiser <me@iamandrew.io>",
   "license": "MIT",
