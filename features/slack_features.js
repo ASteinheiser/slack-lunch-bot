@@ -20,8 +20,10 @@ function slackFeatures(controller) {
 
     if (incoming.block_id === 'restaurant_name') {
       await scheduleLunchMenu(bot, message);
+    } else if (incoming.block_id === 'restaurant_menu') {
+      await scheduleLunchDueTime(bot, message);
     } else {
-      await bot.replyPublic(message, `Sounds like your choice is ${scheduleData.restaurant_name} @ ${scheduleData.restaurant_menu}`);
+      await bot.replyPublic(message, `The lunch pick is ${scheduleData.restaurant_name} (${scheduleData.restaurant_menu}). Please submit orders by ${scheduleData.due_time}`);
       const newRest = new Restaurant({ name: scheduleData.restaurant_name, menu: scheduleData.restaurant_menu });
       newRest.save().then(console.log);
       scheduleData = {};
@@ -70,6 +72,30 @@ const scheduleLunchMenu = async (bot, message) => {
         'label': {
           'type': 'plain_text',
           'text': 'Link to menu',
+        },
+        'dispatch_action': true
+      }
+    ]
+  });
+};
+
+const scheduleLunchDueTime = async (bot, message) => {
+  await bot.replyPublic(message, {
+    blocks: [
+      {
+        'type': 'section',
+        'text': {
+          'type': 'mrkdwn',
+          'text': '*When are orders due by?* (ex: "5pm" or "10am")'
+        },
+      },
+      {
+        'type': 'input',
+        'block_id': 'due_time',
+        'element': { 'type': 'plain_text_input' },
+        'label': {
+          'type': 'plain_text',
+          'text': 'Orders Due Time',
         },
         'dispatch_action': true
       }
