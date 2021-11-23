@@ -24,7 +24,9 @@ function slackFeatures(controller) {
       scheduleData[incoming.block_id] = incoming.value;
     }
 
-    if (incoming.block_id === 'restaurant_name') {
+    if (incoming.block_id === 'restaurant_choice') {
+      await scheduleLunchDueTime(bot, message);
+    } else if (incoming.block_id === 'restaurant_name') {
       await scheduleLunchMenu(bot, message);
     } else if (incoming.block_id === 'restaurant_menu') {
       new Restaurant({
@@ -47,6 +49,48 @@ const scheduleLunch = async (bot, message) => {
         'text': {
           'type': 'mrkdwn',
           'text': '*What is for lunch today?*'
+        },
+      },
+      {
+        'type': 'input',
+        'block_id': 'restaurant_choice',
+        'element': {
+          'type': 'static_select',
+          'options': [
+            {
+              'text': {
+                'type': 'plain_text',
+                'text': '*this is plain_text text*'
+              },
+              'value': 'value-0'
+            },
+            {
+              'text': {
+                'type': 'plain_text',
+                'text': '*this is plain_text text*'
+              },
+              'value': 'value-1'
+            },
+            {
+              'text': {
+                'type': 'plain_text',
+                'text': '*this is plain_text text*'
+              },
+              'value': 'value-2'
+            }
+          ],
+        },
+        'label': {
+          'type': 'plain_text',
+          'text': 'Lunch pick',
+        },
+        'dispatch_action': true
+      },
+      {
+        'type': 'section',
+        'text': {
+          'type': 'mrkdwn',
+          'text': '*OR* enter in a new lunch spot...'
         },
       },
       {
