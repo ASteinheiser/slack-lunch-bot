@@ -6,8 +6,6 @@ function slackFeatures(controller) {
       await bot.replyPublic(message, 'Hey there :wink:\nYou can "schedule" a lunch order with `/lunchbot schedule`!');
     } else if (message.text === 'schedule') {
       await scheduleLunch(bot, message);
-    } else if (message.text === 'get') {
-      Restaurant.find().exec((err, data) => console.log({ err, data }));
     } else {
       await bot.replyPublic(message, 'Invalid command, try `/lunchbot help`...');
     }
