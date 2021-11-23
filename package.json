@@ -10,10 +10,10 @@
   },
   "dependencies": {
     "botbuilder-adapter-slack": "^1.0.13",
-    "botbuilder-storage-mongodb": "^0.9.5",
     "botkit": "^4.10.0",
-    "botkit-plugin-cms": "^1.0.3",
-    "dotenv": "^7.0.0"
+    "dotenv": "^7.0.0",
+    "mongoose": "^6.0.13",
+    "request": "^2.88.2"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"

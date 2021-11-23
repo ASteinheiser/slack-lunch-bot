@@ -8,19 +8,11 @@
 const { Botkit } = require('botkit');
 // Import a platform-specific adapter for slack.
 const { SlackAdapter, SlackMessageTypeMiddleware, SlackEventMiddleware } = require('botbuilder-adapter-slack');
-// Import mongodb storage adapter for botkit
-const { MongoDbStorage } = require('botbuilder-storage-mongodb');
 // Import features for the lunch bot
 const { oauthRoutes, getTokenForTeam, getBotUserByTeam } = require('./features/routes_oauth');
 const { slackFeatures } = require('./features/slack_features');
 
 require('dotenv').config();
-
-let storage = null;
-// TODO: remove `false` when ready to use mongo
-if (process.env.MONGO_URI && false) {
-  storage = mongoStorage = new MongoDbStorage({ url: process.env.MONGO_URI });
-}
 
 const adapter = new SlackAdapter({
   // TODO: REMOVE THIS OPTION AFTER YOU HAVE CONFIGURED YOUR APP!
@@ -54,7 +46,6 @@ adapter.use(new SlackMessageTypeMiddleware());
 const controller = new Botkit({
   webhook_uri: '/api/messages',
   adapter: adapter,
-  storage
 });
 
 controller.webserver.get('/', (req, res) => {

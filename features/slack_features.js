@@ -1,13 +1,34 @@
-/**
- * Copyright (c) Microsoft Corporation. All rights reserved.
- * Licensed under the MIT License.
- */
+const mongoose = require('mongoose');
+
+require('dotenv').config();
+
+mongoose.connect(process.env.MONGO_URI || '');
+
+const Restaurant = mongoose.model(
+  'Restaurant',
+  new mongoose.Schema({
+    name: String,
+    menu: String,
+  }),
+);
+
+const Order = mongoose.model(
+  'Order',
+  new mongoose.Schema({
+    name: String,
+    restaurantId: String,
+    data: String,
+  }),
+);
+
 function slackFeatures(controller) {
   controller.on('slash_command', async (bot, message) => {
     if (message.text === 'help') {
       await bot.replyPublic(message, 'Hey there :wink:\nYou can "schedule" a lunch order with `/lunchbot schedule`!');
     } else if (message.text === 'schedule') {
       await scheduleLunch(bot, message);
+    } else if (message.text === 'get') {
+      Restaurant.find().exec((err, data) => console.log({ err, data }));
     } else {
       await bot.replyPublic(message, 'Invalid command, try `/lunchbot help`...');
     }
@@ -24,6 +45,8 @@ function slackFeatures(controller) {
       await scheduleLunchMenu(bot, message);
     } else {
       await bot.replyPublic(message, `Sounds like your choice is ${scheduleData.restaurant_name} @ ${scheduleData.restaurant_menu}`);
+      const newRest = new Restaurant({ name: scheduleData.restaurant_name, menu: scheduleData.restaurant_menu });
+      newRest.save().then(console.log);
       scheduleData = {};
     }
   });

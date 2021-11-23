@@ -4,10 +4,10 @@ services:
   mongodb:
     container_name: mongodb
     image: mongo:4.2
+    restart: always
+    hostname: mongodb
+    environment:
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_ROOT_USERNAME: admin
     ports:
       - 27017:27017
-    volumes:
-      - mongo-data:/data/db
-
-volumes:
-  mongo-data:
