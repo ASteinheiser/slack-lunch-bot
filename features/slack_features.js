@@ -13,18 +13,18 @@ function slackFeatures(controller) {
     }
   });
 
-  let data = {};
+  let scheduleData = {};
   controller.on('block_actions', async (bot, message) => {
     const incoming = message.incoming_message.channelData.actions[0];
     if (incoming.value) {
-      data[incoming.block_id] = incoming.value;
+      scheduleData[incoming.block_id] = incoming.value;
     }
 
     if (incoming.block_id === 'restaurant_name') {
       await scheduleLunchMenu(bot, message);
     } else {
-      await bot.replyPublic(message, `Sounds like your choice is ${data.restaurant_name} @ ${data.restaurant_menu}`);
-      data = {};
+      await bot.replyPublic(message, `Sounds like your choice is ${scheduleData.restaurant_name} @ ${scheduleData.restaurant_menu}`);
+      scheduleData = {};
     }
   });
 }
