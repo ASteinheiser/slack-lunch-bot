@@ -14,18 +14,26 @@ function slackFeatures(controller) {
   let scheduleData = {};
   controller.on('block_actions', async (bot, message) => {
     const incoming = message.incoming_message.channelData.actions[0];
-    if (incoming.value) {
+    if (incoming.block_id === 'due_time') {
+      const hours = parseInt(incoming.selected_time.split(':')[0], 10);
+      const timeOfDay = hours >= 12 ? 'PM' : 'AM';
+      const formattedTime = `${hours > 12 ? hours - 12 : hours} ${timeOfDay}`;
+
+      scheduleData.due_time = formattedTime;
+    } else if (incoming.value) {
       scheduleData[incoming.block_id] = incoming.value;
     }
 
     if (incoming.block_id === 'restaurant_name') {
       await scheduleLunchMenu(bot, message);
     } else if (incoming.block_id === 'restaurant_menu') {
+      new Restaurant({
+        name: scheduleData.restaurant_name,
+        menu: scheduleData.restaurant_menu,
+      }).save();
       await scheduleLunchDueTime(bot, message);
-    } else {
-      await bot.replyPublic(message, `The lunch pick is ${scheduleData.restaurant_name} (${scheduleData.restaurant_menu}). Please submit orders by ${scheduleData.due_time}`);
-      const newRest = new Restaurant({ name: scheduleData.restaurant_name, menu: scheduleData.restaurant_menu });
-      newRest.save().then(console.log);
+    } else if (incoming.block_id === 'due_time') {
+      await bot.replyPublic(message, `The lunch pick is ${scheduleData.restaurant_name} (${scheduleData.restaurant_menu}). Please submit orders by ${scheduleData.due_time}!`);
       scheduleData = {};
     }
   });
@@ -86,13 +94,13 @@ const scheduleLunchDueTime = async (bot, message) => {
         'type': 'section',
         'text': {
           'type': 'mrkdwn',
-          'text': '*When are orders due by?* (ex: "5pm" or "10am")'
+          'text': '*When are orders due by?*'
         },
       },
       {
         'type': 'input',
         'block_id': 'due_time',
-        'element': { 'type': 'plain_text_input' },
+        'element': { 'type': 'timepicker' },
         'label': {
           'type': 'plain_text',
           'text': 'Orders Due Time',
