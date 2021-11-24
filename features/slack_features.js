@@ -12,36 +12,33 @@ function slackFeatures(controller) {
     }
   });
 
-  let scheduleData = {};
+  let lunchData = {};
   controller.on('block_actions', async (bot, message) => {
     const incoming = message.incoming_message.channelData.actions[0];
-    if (incoming.block_id === 'due_time') {
-      const hours = parseInt(incoming.selected_time.split(':')[0], 10);
-      const timeOfDay = hours >= 12 ? 'PM' : 'AM';
-      const formattedTime = `${hours > 12 ? hours - 12 : hours} ${timeOfDay}`;
+    if (incoming.value) lunchData[incoming.block_id] = incoming.value;
 
-      scheduleData.due_time = formattedTime;
-    } else if (incoming.block_id === 'restaurant_choice') {
-      const selectedData = JSON.parse(incoming.selected_option.value);
-      scheduleData.restaurant_name = selectedData.name;
-      scheduleData.restaurant_menu = selectedData.menu;
-    } else if (incoming.value) {
-      scheduleData[incoming.block_id] = incoming.value;
-    }
+    switch(incoming.block_id) {
+      case 'restaurant_name':
+        return await enterLunchMenuLink(bot, message);
+      case 'restaurant_menu':
+        new Restaurant({
+          name: lunchData.restaurant_name,
+          menu: lunchData.restaurant_menu,
+        }).save();
+        return await enterDueTime(bot, message);
+      case 'restaurant_choice':
+        const selectedData = JSON.parse(incoming.selected_option.value);
+        lunchData.restaurant_name = selectedData.name;
+        lunchData.restaurant_menu = selectedData.menu;
 
-    if (incoming.block_id === 'restaurant_choice') {
-      await enterDueTime(bot, message);
-    } else if (incoming.block_id === 'restaurant_name') {
-      await enterLunchMenuLink(bot, message);
-    } else if (incoming.block_id === 'restaurant_menu') {
-      new Restaurant({
-        name: scheduleData.restaurant_name,
-        menu: scheduleData.restaurant_menu,
-      }).save();
-      await enterDueTime(bot, message);
-    } else if (incoming.block_id === 'due_time') {
-      await bot.replyPublic(message, `:hamburger: The lunch pick is ${scheduleData.restaurant_name} (${scheduleData.restaurant_menu})\n:hourglass: Please submit orders by ${scheduleData.due_time}!`);
-      scheduleData = {};
+        return await enterDueTime(bot, message);
+      case 'due_time':
+        const hours = parseInt(incoming.selected_time.split(':')[0], 10);
+        const timeOfDay = hours >= 12 ? 'PM' : 'AM';
+        const formattedTime = `${hours > 12 ? hours - 12 : hours} ${timeOfDay}`;
+
+        await bot.replyPublic(message, `:hamburger: The lunch pick is ${lunchData.restaurant_name} (${lunchData.restaurant_menu})\n:hourglass: Please submit orders by ${formattedTime}!`);
+        return lunchData = {};
     }
   });
 }
