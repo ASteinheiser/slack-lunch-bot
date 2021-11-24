@@ -1,12 +1,16 @@
-const { Restaurant } = require('../models');
+const { Restaurant, Blacklist } = require('../models');
 
 function slackFeatures(controller) {
   controller.on('slash_command', async (bot, message) => {
     switch(message.text) {
       case 'help':
-        return await bot.replyPublic(message, 'Hey there :wink:\nYou can "schedule" a lunch order with `/lunchbot schedule`!');
+        return await bot.replyPublic(message, 'Hey there :wink:\nYou can "schedule" a lunch order with `/lunchbot schedule`!\nOr `/subscribe` and `/unsubscribe` to lunch call');
       case 'schedule':
         return await enterLunchPick(bot, message);
+      case 'subscribe':
+        return console.log(message.user_id);
+      case 'unsubscribe':
+        return console.log(message.user_id);
       default:
         await bot.replyPublic(message, 'Invalid command, try `/lunchbot help`...');
     }
@@ -39,15 +43,36 @@ function slackFeatures(controller) {
 
         await bot.replyPublic(message, `:hamburger: The lunch pick is ${lunchData.restaurant_name} (${lunchData.restaurant_menu})\n:hourglass: Please submit orders by ${formattedTime}!`);
 
-        // TODO: send DMs to all users that have not unsubscribed & remove check to send only to me
-        const userIds = (await bot.api.users.list()).members.filter(u => u.real_name === 'Andrew Steinheiser').map(u => u.id);
+        const users = (await bot.api.users.list()).members;
+        const userIds = users.map(u => u.id);
+        const blacklist = await Blacklist.find();
 
-        userIds.forEach(async (userId) => {
-          await bot.api.chat.postMessage({
-            channel: userId,
-            text: 'lunch time boi!'
+        // TODO: remove this
+        if (blacklist.length === 0) {
+          const promises = [];
+          users.forEach((user) => {
+            promises.push(Blacklist.create({
+              userId: user.id,
+              fullName: user.real_name
+            }));
           });
+          await Promise.all(promises);
+        }
+
+        const updatedBlacklist = await Blacklist.find();
+        const activeUsers = userIds.filter(userId => (
+          !updatedBlacklist.find(b => b.userId === userId)
+        ));
+
+        const promises = [];
+        activeUsers.forEach((userId) => {
+          promises.push(bot.api.chat.postMessage({
+            channel: userId,
+            text: 'lunch time!'
+          }));
         });
+        console.log(activeUsers.length);
+        // await Promise.all(promises);
 
         return lunchData = {};
     }
