@@ -6,6 +6,9 @@ const {
   enterLunchOrder,
 } = require('./slack_message_prompts');
 
+require('dotenv').config();
+const { LUNCH_CHANNEL_ID } = process.env;
+
 function slackFeatures(controller) {
   controller.on('slash_command', async (bot, message) => {
     switch(message.text) {
@@ -96,7 +99,8 @@ const getFormattedTime = (hourString) => {
 }
 
 const sendLunchCallDMs = async (bot, restaurantId) => {
-  const users = (await bot.api.users.list()).members;
+  // get all users in the lunch call channel
+  const users = (await bot.api.conversations.members({ channel: LUNCH_CHANNEL_ID })).members;
   const userIds = users.map(u => u.id);
   const blacklist = await Blacklist.find();
 
