@@ -100,18 +100,14 @@ const getFormattedTime = (hourString) => {
 
 const sendLunchCallDMs = async (bot, restaurantId) => {
   // get all users in the lunch call channel
-  const users = (await bot.api.conversations.members({ channel: LUNCH_CHANNEL_ID })).members;
-  const userIds = users.map(u => u.id);
+  const userIds = (await bot.api.conversations.members({ channel: LUNCH_CHANNEL_ID })).members;
   const blacklist = await Blacklist.find();
 
   // TODO: remove this
   if (blacklist.length === 0) {
     const promises = [];
-    users.forEach((user) => {
-      promises.push(Blacklist.create({
-        userId: user.id,
-        fullName: user.real_name
-      }));
+    userIds.forEach((userId) => {
+      promises.push(Blacklist.create({ userId }));
     });
     await Promise.all(promises);
   }
