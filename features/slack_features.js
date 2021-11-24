@@ -39,9 +39,15 @@ function slackFeatures(controller) {
 
         await bot.replyPublic(message, `:hamburger: The lunch pick is ${lunchData.restaurant_name} (${lunchData.restaurant_menu})\n:hourglass: Please submit orders by ${formattedTime}!`);
 
-        // TODO: send DMs to all users that have not unsubscribed
-        const userIds = (await bot.api.users.list()).members.map(u => u.id);
-        console.log(userIds);
+        // TODO: send DMs to all users that have not unsubscribed & remove check to send only to me
+        const userIds = (await bot.api.users.list()).members.filter(u => u.real_name === 'Andrew Steinheiser').map(u => u.id);
+
+        userIds.forEach(async (userId) => {
+          await bot.api.chat.postMessage({
+            channel: userId,
+            text: 'lunch time boi!'
+          });
+        });
 
         return lunchData = {};
     }
