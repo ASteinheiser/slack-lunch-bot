@@ -20,6 +20,10 @@ function slackFeatures(controller) {
       const formattedTime = `${hours > 12 ? hours - 12 : hours} ${timeOfDay}`;
 
       scheduleData.due_time = formattedTime;
+    } else if (incoming.block_id === 'restaurant_choice') {
+      const selectedData = JSON.parse(incoming.selected_option.value);
+      scheduleData.restaurant_name = selectedData.name;
+      scheduleData.restaurant_menu = selectedData.menu;
     } else if (incoming.value) {
       scheduleData[incoming.block_id] = incoming.value;
     }
@@ -42,6 +46,38 @@ function slackFeatures(controller) {
 }
 
 const scheduleLunch = async (bot, message) => {
+  const restaurants = await Restaurant.find();
+  const options = restaurants.map(restaurant => ({
+    'text': {
+      'type': 'plain_text',
+      'text': `${restaurant.name} (${restaurant.menu})`
+    },
+    'value': JSON.stringify(restaurant)
+  }));
+
+  let restaurantSelect = {
+    'type': 'section',
+    'text': {
+      'type': 'mrkdwn',
+      'text': '_A dropdown will be available after the first scheduled lunch..._'
+    },
+  };
+  if (options.length > 0) {
+    restaurantSelect = {
+      'type': 'input',
+      'block_id': 'restaurant_choice',
+      'element': {
+        'type': 'static_select',
+        'options': options,
+      },
+      'label': {
+        'type': 'plain_text',
+        'text': 'Lunch pick',
+      },
+      'dispatch_action': true
+    };
+  }
+
   await bot.replyPublic(message, {
     blocks: [
       {
@@ -51,41 +87,7 @@ const scheduleLunch = async (bot, message) => {
           'text': '*What is for lunch today?*'
         },
       },
-      {
-        'type': 'input',
-        'block_id': 'restaurant_choice',
-        'element': {
-          'type': 'static_select',
-          'options': [
-            {
-              'text': {
-                'type': 'plain_text',
-                'text': '*this is plain_text text*'
-              },
-              'value': 'value-0'
-            },
-            {
-              'text': {
-                'type': 'plain_text',
-                'text': '*this is plain_text text*'
-              },
-              'value': 'value-1'
-            },
-            {
-              'text': {
-                'type': 'plain_text',
-                'text': '*this is plain_text text*'
-              },
-              'value': 'value-2'
-            }
-          ],
-        },
-        'label': {
-          'type': 'plain_text',
-          'text': 'Lunch pick',
-        },
-        'dispatch_action': true
-      },
+      { ...restaurantSelect },
       {
         'type': 'section',
         'text': {
