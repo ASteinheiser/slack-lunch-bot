@@ -1,4 +1,4 @@
-const { Restaurant } = require('../models');
+const { Restaurant, Order } = require('../models');
 
 const enterLunchPick = async (bot, message) => {
   const restaurants = await Restaurant.find();
@@ -112,4 +112,19 @@ const enterDueTime = async (bot, message) => {
   });
 };
 
-module.exports = { enterLunchPick, enterLunchMenuLink, enterDueTime };
+const enterLunchOrder = async (bot, restaurantId, activeUsers) => {
+  const orders = await Order.find({ restaurantId });
+
+  const promises = [];
+  activeUsers.forEach((userId) => {
+    const userOrders = orders.filter(o => o.userId === userId);
+    // TODO: something with the user's order data
+    promises.push(bot.api.chat.postMessage({
+      channel: userId,
+      text: `lunch time!`
+    }));
+  });
+  await Promise.all(promises);
+}
+
+module.exports = { enterLunchPick, enterLunchMenuLink, enterDueTime, enterLunchOrder };

@@ -1,5 +1,10 @@
 const { Restaurant, Blacklist } = require('../models');
-const { enterLunchPick, enterLunchMenuLink, enterDueTime } = require('./slack_message_prompts');
+const {
+  enterLunchPick,
+  enterLunchMenuLink,
+  enterDueTime,
+  enterLunchOrder,
+} = require('./slack_message_prompts');
 
 function slackFeatures(controller) {
   controller.on('slash_command', async (bot, message) => {
@@ -91,7 +96,6 @@ const getFormattedTime = (hourString) => {
 }
 
 const sendLunchCallDMs = async (bot, restaurantId) => {
-  console.log({ restaurantId });
   const users = (await bot.api.users.list()).members;
   const userIds = users.map(u => u.id);
   const blacklist = await Blacklist.find();
@@ -107,26 +111,18 @@ const sendLunchCallDMs = async (bot, restaurantId) => {
     });
     await Promise.all(promises);
   }
-
   const updatedBlacklist = await Blacklist.find();
+
   const activeUsers = userIds.filter(userId => (
     !updatedBlacklist.find(b => b.userId === userId)
   ));
-  console.log(activeUsers.length);
 
   // TODO: remove this
   if (activeUsers.length >= 3) {
     return;
   }
 
-  const promises = [];
-  activeUsers.forEach((userId) => {
-    promises.push(bot.api.chat.postMessage({
-      channel: userId,
-      text: 'lunch time!'
-    }));
-  });
-  await Promise.all(promises);
+  await enterLunchOrder(bot, restaurantId, activeUsers);
 };
 
 module.exports = { slackFeatures };
