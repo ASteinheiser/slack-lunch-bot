@@ -17,29 +17,29 @@ function slackFeatures(controller) {
     }
   });
 
-  let lunchData = {};
+  let lunchCallData = {};
   controller.on('block_actions', async (bot, message) => {
     const incoming = message.incoming_message.channelData.actions[0];
-    if (incoming.value) lunchData[incoming.block_id] = incoming.value;
+    if (incoming.value) lunchCallData[incoming.block_id] = incoming.value;
 
     switch(incoming.block_id) {
       case 'restaurant_name':
         return await enterLunchMenuLink(bot, message);
       case 'restaurant_menu':
-        await Restaurant.create({ name: lunchData.restaurant_name, menu: lunchData.restaurant_menu });
+        await Restaurant.create({ name: lunchCallData.restaurant_name, menu: lunchCallData.restaurant_menu });
         return await enterDueTime(bot, message);
       case 'restaurant_choice':
         const restaurantData = JSON.parse(incoming.selected_option.value);
-        lunchData.restaurant_name = restaurantData.name;
-        lunchData.restaurant_menu = restaurantData.menu;
+        lunchCallData.restaurant_name = restaurantData.name;
+        lunchCallData.restaurant_menu = restaurantData.menu;
 
         return await enterDueTime(bot, message);
       case 'due_time':
         const formattedTime = getFormattedTime(incoming.selected_time);
-        await bot.replyPublic(message, `:hamburger: The lunch pick is ${lunchData.restaurant_name} (${lunchData.restaurant_menu})\n:hourglass: Please submit orders by ${formattedTime}!`);
+        await bot.replyPublic(message, `:hamburger: The lunch pick is ${lunchCallData.restaurant_name} (${lunchCallData.restaurant_menu})\n:hourglass: Please submit orders by ${formattedTime}!`);
         await sendLunchCallDMs(bot);
 
-        return lunchData = {};
+        return lunchCallData = {};
     }
   });
 }
