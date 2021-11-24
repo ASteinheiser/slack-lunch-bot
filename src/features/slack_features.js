@@ -29,48 +29,15 @@ function slackFeatures(controller) {
         await Restaurant.create({ name: lunchData.restaurant_name, menu: lunchData.restaurant_menu });
         return await enterDueTime(bot, message);
       case 'restaurant_choice':
-        const selectedData = JSON.parse(incoming.selected_option.value);
-        lunchData.restaurant_name = selectedData.name;
-        lunchData.restaurant_menu = selectedData.menu;
+        const restaurantData = JSON.parse(incoming.selected_option.value);
+        lunchData.restaurant_name = restaurantData.name;
+        lunchData.restaurant_menu = restaurantData.menu;
 
         return await enterDueTime(bot, message);
       case 'due_time':
-        const hours = parseInt(incoming.selected_time.split(':')[0], 10);
-        const timeOfDay = hours >= 12 ? 'PM' : 'AM';
-        const formattedTime = `${hours > 12 ? hours - 12 : hours} ${timeOfDay}`;
-
+        const formattedTime = getFormattedTime(incoming.selected_time);
         await bot.replyPublic(message, `:hamburger: The lunch pick is ${lunchData.restaurant_name} (${lunchData.restaurant_menu})\n:hourglass: Please submit orders by ${formattedTime}!`);
-
-        const users = (await bot.api.users.list()).members;
-        const userIds = users.map(u => u.id);
-        const blacklist = await Blacklist.find();
-
-        // TODO: remove this
-        if (blacklist.length === 0) {
-          const promises = [];
-          users.forEach((user) => {
-            promises.push(Blacklist.create({
-              userId: user.id,
-              fullName: user.real_name
-            }));
-          });
-          await Promise.all(promises);
-        }
-
-        const updatedBlacklist = await Blacklist.find();
-        const activeUsers = userIds.filter(userId => (
-          !updatedBlacklist.find(b => b.userId === userId)
-        ));
-
-        const promises = [];
-        activeUsers.forEach((userId) => {
-          promises.push(bot.api.chat.postMessage({
-            channel: userId,
-            text: 'lunch time!'
-          }));
-        });
-        console.log(activeUsers.length);
-        // await Promise.all(promises);
+        await sendLunchCallDMs(bot);
 
         return lunchData = {};
     }
@@ -104,5 +71,49 @@ const unsubscribeToLunchCall = async (bot, message) => {
     return bot.replyPublic(message, 'Hmm... something bad happened, try again');
   }
 }
+
+const getFormattedTime = (hourString) => {
+  const hours = parseInt(hourString.split(':')[0], 10);
+  const timeOfDay = hours >= 12 ? 'PM' : 'AM';
+  return `${hours > 12 ? hours - 12 : hours} ${timeOfDay}`;
+}
+
+const sendLunchCallDMs = async (bot) => {
+  const users = (await bot.api.users.list()).members;
+  const userIds = users.map(u => u.id);
+  const blacklist = await Blacklist.find();
+
+  // TODO: remove this
+  if (blacklist.length === 0) {
+    const promises = [];
+    users.forEach((user) => {
+      promises.push(Blacklist.create({
+        userId: user.id,
+        fullName: user.real_name
+      }));
+    });
+    await Promise.all(promises);
+  }
+
+  const updatedBlacklist = await Blacklist.find();
+  const activeUsers = userIds.filter(userId => (
+    !updatedBlacklist.find(b => b.userId === userId)
+  ));
+  console.log(activeUsers.length);
+
+  // TODO: remove this
+  if (activeUsers.length >= 3) {
+    return;
+  }
+
+  const promises = [];
+  activeUsers.forEach((userId) => {
+    promises.push(bot.api.chat.postMessage({
+      channel: userId,
+      text: 'lunch time!'
+    }));
+  });
+  await Promise.all(promises);
+};
 
 module.exports = { slackFeatures };
