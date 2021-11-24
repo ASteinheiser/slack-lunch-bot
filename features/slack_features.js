@@ -38,6 +38,11 @@ function slackFeatures(controller) {
         const formattedTime = `${hours > 12 ? hours - 12 : hours} ${timeOfDay}`;
 
         await bot.replyPublic(message, `:hamburger: The lunch pick is ${lunchData.restaurant_name} (${lunchData.restaurant_menu})\n:hourglass: Please submit orders by ${formattedTime}!`);
+
+        // TODO: send DMs to all users that have not unsubscribed
+        const userIds = (await bot.api.users.list()).members.map(u => u.id);
+        console.log(userIds);
+
         return lunchData = {};
     }
   });
