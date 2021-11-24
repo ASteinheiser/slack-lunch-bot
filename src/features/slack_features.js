@@ -26,10 +26,7 @@ function slackFeatures(controller) {
       case 'restaurant_name':
         return await enterLunchMenuLink(bot, message);
       case 'restaurant_menu':
-        new Restaurant({
-          name: lunchData.restaurant_name,
-          menu: lunchData.restaurant_menu,
-        }).save();
+        await Restaurant.create({ name: lunchData.restaurant_name, menu: lunchData.restaurant_menu });
         return await enterDueTime(bot, message);
       case 'restaurant_choice':
         const selectedData = JSON.parse(incoming.selected_option.value);
