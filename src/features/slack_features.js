@@ -26,12 +26,7 @@ function slackFeatures(controller) {
       case 'restaurant_name':
         return await enterLunchMenuLink(bot, message);
       case 'restaurant_menu':
-        const newRestaurant = await Restaurant.create({
-          name: lunchCallData.restaurant_name,
-          menu: lunchCallData.restaurant_menu
-        });
-        lunchCallData.restaurant_id = newRestaurant._id.toString();
-        return await enterDueTime(bot, message);
+        return await createRestaurant(bot, message, lunchCallData);
       case 'restaurant_choice':
         const restaurantData = JSON.parse(incoming.selected_option.value);
         lunchCallData.restaurant_name = restaurantData.name;
@@ -76,6 +71,18 @@ const unsubscribeToLunchCall = async (bot, message) => {
     return bot.replyPublic(message, 'Hmm... something bad happened, try again');
   }
 }
+
+const createRestaurant = async (bot, message, lunchCallData) => {
+  if (await Restaurant.findOne({ name: lunchCallData.restaurant_name })) {
+    return await bot.replyPublic(message, 'Restaurant already exists');
+  }
+  const newRestaurant = await Restaurant.create({
+    name: lunchCallData.restaurant_name,
+    menu: lunchCallData.restaurant_menu
+  });
+  lunchCallData.restaurant_id = newRestaurant._id.toString();
+  await enterDueTime(bot, message);
+};
 
 const getFormattedTime = (hourString) => {
   const hours = parseInt(hourString.split(':')[0], 10);
