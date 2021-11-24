@@ -26,18 +26,23 @@ function slackFeatures(controller) {
       case 'restaurant_name':
         return await enterLunchMenuLink(bot, message);
       case 'restaurant_menu':
-        await Restaurant.create({ name: lunchCallData.restaurant_name, menu: lunchCallData.restaurant_menu });
+        const newRestaurant = await Restaurant.create({
+          name: lunchCallData.restaurant_name,
+          menu: lunchCallData.restaurant_menu
+        });
+        lunchCallData.restaurant_id = newRestaurant._id.toString();
         return await enterDueTime(bot, message);
       case 'restaurant_choice':
         const restaurantData = JSON.parse(incoming.selected_option.value);
         lunchCallData.restaurant_name = restaurantData.name;
         lunchCallData.restaurant_menu = restaurantData.menu;
+        lunchCallData.restaurant_id = restaurantData._id;
 
         return await enterDueTime(bot, message);
       case 'due_time':
         const formattedTime = getFormattedTime(incoming.selected_time);
         await bot.replyPublic(message, `:hamburger: The lunch pick is ${lunchCallData.restaurant_name} (${lunchCallData.restaurant_menu})\n:hourglass: Please submit orders by ${formattedTime}!`);
-        await sendLunchCallDMs(bot);
+        await sendLunchCallDMs(bot, lunchCallData.restaurant_id);
 
         return lunchCallData = {};
     }
@@ -78,7 +83,8 @@ const getFormattedTime = (hourString) => {
   return `${hours > 12 ? hours - 12 : hours} ${timeOfDay}`;
 }
 
-const sendLunchCallDMs = async (bot) => {
+const sendLunchCallDMs = async (bot, restaurantId) => {
+  console.log({ restaurantId });
   const users = (await bot.api.users.list()).members;
   const userIds = users.map(u => u.id);
   const blacklist = await Blacklist.find();
