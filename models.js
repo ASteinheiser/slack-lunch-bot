@@ -15,8 +15,9 @@ const Restaurant = mongoose.model(
 const Order = mongoose.model(
   'Order',
   new mongoose.Schema({
-    name: String,
+    userId: String,
     restaurantId: String,
+    name: String,
     data: String,
   }),
 );
