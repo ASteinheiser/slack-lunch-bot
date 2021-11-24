@@ -22,4 +22,11 @@ const Order = mongoose.model(
   }),
 );
 
-module.exports = { Restaurant, Order };
+const Blacklist = mongoose.model(
+  'Blacklist',
+  new mongoose.Schema({
+    userId: String,
+  }),
+);
+
+module.exports = { Restaurant, Order, Blacklist };
