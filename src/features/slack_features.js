@@ -9,9 +9,9 @@ function slackFeatures(controller) {
       case 'schedule':
         return await enterLunchPick(bot, message);
       case 'subscribe':
-        return console.log(message.user_id);
+        return await subscribeToLunchCall(bot, message);
       case 'unsubscribe':
-        return console.log(message.user_id);
+        return await unsubscribeToLunchCall(bot, message);
       default:
         await bot.replyPublic(message, 'Invalid command, try `/lunchbot help`...');
     }
@@ -75,6 +75,34 @@ function slackFeatures(controller) {
         return lunchData = {};
     }
   });
+}
+
+const subscribeToLunchCall = async (bot, message) => {
+  try {
+    const blacklist = await Blacklist.findOne({ userId: message.user_id });
+    if (!blacklist) {
+      return bot.replyPublic(message, 'You are already subscribed to lunch call');
+    }
+    await Blacklist.deleteOne({ userId: message.user_id });
+    return bot.replyPublic(message, 'Subscribed to lunch call :)');
+  } catch (err) {
+    console.log(err);
+    return bot.replyPublic(message, 'Hmm... something bad happened, try again');
+  }
+}
+
+const unsubscribeToLunchCall = async (bot, message) => {
+  try {
+    const blacklist = await Blacklist.findOne({ userId: message.user_id });
+    if (blacklist) {
+      return bot.replyPublic(message, 'You are already unsubscribed');
+    }
+    await Blacklist.create({ userId: message.user_id });
+    return bot.replyPublic(message, 'You got it! No longer subscribed to lunch call');
+  } catch (err) {
+    console.log(err);
+    return bot.replyPublic(message, 'Hmm... something bad happened, try again');
+  }
 }
 
 module.exports = { slackFeatures };
