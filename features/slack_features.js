@@ -2,12 +2,13 @@ const { Restaurant } = require('../models');
 
 function slackFeatures(controller) {
   controller.on('slash_command', async (bot, message) => {
-    if (message.text === 'help') {
-      await bot.replyPublic(message, 'Hey there :wink:\nYou can "schedule" a lunch order with `/lunchbot schedule`!');
-    } else if (message.text === 'schedule') {
-      await scheduleLunch(bot, message);
-    } else {
-      await bot.replyPublic(message, 'Invalid command, try `/lunchbot help`...');
+    switch(message.text) {
+      case 'help':
+        return await bot.replyPublic(message, 'Hey there :wink:\nYou can "schedule" a lunch order with `/lunchbot schedule`!');
+      case 'schedule':
+        return await scheduleLunch(bot, message);
+      default:
+        await bot.replyPublic(message, 'Invalid command, try `/lunchbot help`...');
     }
   });
 
