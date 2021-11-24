@@ -6,7 +6,7 @@ function slackFeatures(controller) {
       case 'help':
         return await bot.replyPublic(message, 'Hey there :wink:\nYou can "schedule" a lunch order with `/lunchbot schedule`!');
       case 'schedule':
-        return await scheduleLunch(bot, message);
+        return await enterLunchPick(bot, message);
       default:
         await bot.replyPublic(message, 'Invalid command, try `/lunchbot help`...');
     }
@@ -30,23 +30,23 @@ function slackFeatures(controller) {
     }
 
     if (incoming.block_id === 'restaurant_choice') {
-      await scheduleLunchDueTime(bot, message);
+      await enterDueTime(bot, message);
     } else if (incoming.block_id === 'restaurant_name') {
-      await scheduleLunchMenu(bot, message);
+      await enterLunchMenuLink(bot, message);
     } else if (incoming.block_id === 'restaurant_menu') {
       new Restaurant({
         name: scheduleData.restaurant_name,
         menu: scheduleData.restaurant_menu,
       }).save();
-      await scheduleLunchDueTime(bot, message);
+      await enterDueTime(bot, message);
     } else if (incoming.block_id === 'due_time') {
-      await bot.replyPublic(message, `The lunch pick is ${scheduleData.restaurant_name} (${scheduleData.restaurant_menu}). Please submit orders by ${scheduleData.due_time}!`);
+      await bot.replyPublic(message, `:hamburger: The lunch pick is ${scheduleData.restaurant_name} (${scheduleData.restaurant_menu})\n:hourglass: Please submit orders by ${scheduleData.due_time}!`);
       scheduleData = {};
     }
   });
 }
 
-const scheduleLunch = async (bot, message) => {
+const enterLunchPick = async (bot, message) => {
   const restaurants = await Restaurant.find();
   const options = restaurants.map(restaurant => ({
     'text': {
@@ -110,7 +110,7 @@ const scheduleLunch = async (bot, message) => {
   });
 };
 
-const scheduleLunchMenu = async (bot, message) => {
+const enterLunchMenuLink = async (bot, message) => {
   await bot.replyPublic(message, {
     blocks: [
       {
@@ -134,7 +134,7 @@ const scheduleLunchMenu = async (bot, message) => {
   });
 };
 
-const scheduleLunchDueTime = async (bot, message) => {
+const enterDueTime = async (bot, message) => {
   await bot.replyPublic(message, {
     blocks: [
       {
