@@ -26,6 +26,7 @@ const Blacklist = mongoose.model(
   'Blacklist',
   new mongoose.Schema({
     userId: String,
+    fullName: String,
   }),
 );
 
