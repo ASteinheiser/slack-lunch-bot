@@ -184,4 +184,59 @@ const enterLunchOrder = async (bot, restaurantId, activeUsers) => {
   await Promise.all(promises);
 }
 
-module.exports = { enterLunchPick, enterLunchMenuLink, enterDueTime, enterLunchOrder };
+const enterLunchOrderMods = async (bot, message) => {
+  await bot.replyPublic(message, {
+    blocks: [
+      {
+        'type': 'section',
+        'text': {
+          'type': 'mrkdwn',
+          'text': '*Would you like any modifications?*'
+        },
+      },
+      {
+        'type': 'input',
+        'block_id': 'order_mods',
+        'element': { 'type': 'plain_text_input' },
+        'label': {
+          'type': 'plain_text',
+          'text': 'Order modifications',
+        },
+        'dispatch_action': true
+      }
+    ]
+  });
+}
+
+const enterLunchOrderName = async (bot, message) => {
+  await bot.replyPublic(message, {
+    blocks: [
+      {
+        'type': 'section',
+        'text': {
+          'type': 'mrkdwn',
+          'text': '*What would you like to nickname this order?*'
+        },
+      },
+      {
+        'type': 'input',
+        'block_id': 'order_name',
+        'element': { 'type': 'plain_text_input' },
+        'label': {
+          'type': 'plain_text',
+          'text': 'Order name',
+        },
+        'dispatch_action': true
+      }
+    ]
+  });
+}
+
+module.exports = {
+  enterLunchPick,
+  enterLunchMenuLink,
+  enterDueTime,
+  enterLunchOrder,
+  enterLunchOrderMods,
+  enterLunchOrderName,
+};
