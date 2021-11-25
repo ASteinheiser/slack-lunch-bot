@@ -138,9 +138,9 @@ const sendLunchCallDMs = async (bot, restaurantId) => {
 };
 
 const createOrder = async (bot, message, lunchCallData) => {
-  if (await Order.findOne({ name: lunchCallData.order_name })) {
-    return await bot.replyPublic(message, 'Order with that name already exists');
-  }
+  const existingOrder = await Order.findOne({ name: lunchCallData.order_name });
+  if (existingOrder) await existingOrder.delete();
+
   const newOrder = await Order.create({
     userId: message.user,
     // TODO: fix this... somehow pass the restaurant id :shrug:
