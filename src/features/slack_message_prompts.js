@@ -113,15 +113,72 @@ const enterDueTime = async (bot, message) => {
 };
 
 const enterLunchOrder = async (bot, restaurantId, activeUsers) => {
+  const restaurant = await Restaurant.findById(restaurantId);
   const orders = await Order.find({ restaurantId });
 
   const promises = [];
   activeUsers.forEach((userId) => {
     const userOrders = orders.filter(o => o.userId === userId);
-    // TODO: something with the user's order data
+    const options = userOrders.map(order => ({
+      'text': {
+        'type': 'plain_text',
+        'text': order.name
+      },
+      'value': JSON.stringify(order)
+    }));
+
+    let orderSelect = {
+      'type': 'section',
+      'text': {
+        'type': 'mrkdwn',
+        'text': '_A dropdown will be available after your first order for this restaurant..._'
+      },
+    };
+    if (options.length > 0) {
+      orderSelect = {
+        'type': 'input',
+        'block_id': 'order_choice',
+        'element': {
+          'type': 'static_select',
+          'options': options,
+        },
+        'label': {
+          'type': 'plain_text',
+          'text': 'Order select',
+        },
+        'dispatch_action': true
+      };
+    }
+
     promises.push(bot.api.chat.postMessage({
       channel: userId,
-      text: `lunch time!`
+      blocks: [
+        {
+          'type': 'section',
+          'text': {
+            'type': 'mrkdwn',
+            'text': `What would you like from *${restaurant.name}* (${restaurant.menu})?`
+          },
+        },
+        { ...orderSelect },
+        {
+          'type': 'section',
+          'text': {
+            'type': 'mrkdwn',
+            'text': '*OR* enter in a new order...'
+          },
+        },
+        {
+          'type': 'input',
+          'block_id': 'order_item',
+          'element': { 'type': 'plain_text_input' },
+          'label': {
+            'type': 'plain_text',
+            'text': 'Order item (modifications will come next)',
+          },
+          'dispatch_action': true
+        }
+      ]
     }));
   });
   await Promise.all(promises);
