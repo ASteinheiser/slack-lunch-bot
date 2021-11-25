@@ -124,7 +124,7 @@ const enterLunchOrder = async (bot, restaurantId, activeUsers) => {
         'type': 'plain_text',
         'text': order.name
       },
-      'value': JSON.stringify(order)
+      'value': JSON.stringify({ name: order.name, item: order.item, mods: order.mods }),
     }));
 
     let orderSelect = {

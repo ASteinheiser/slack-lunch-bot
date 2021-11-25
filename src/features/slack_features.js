@@ -47,9 +47,7 @@ function slackFeatures(controller) {
       case 'due_time':
         const formattedTime = getFormattedTime(incoming.selected_time);
         await bot.replyPublic(message, `:hamburger: The lunch pick is ${lunchCallData.restaurant_name} (${lunchCallData.restaurant_menu})\n:hourglass: Please submit orders by ${formattedTime}!`);
-        await sendLunchCallDMs(bot, lunchCallData.restaurant_id);
-
-        return lunchCallData = {};
+        return await sendLunchCallDMs(bot, lunchCallData.restaurant_id);
       case 'order_item':
         return await enterLunchOrderMods(bot, message);
       case 'order_mods':
@@ -143,16 +141,13 @@ const createOrder = async (bot, message, lunchCallData) => {
 
   const newOrder = await Order.create({
     userId: message.user,
-    // TODO: fix this... somehow pass the restaurant id :shrug:
-    restaurantId: '',
+    restaurantId: lunchCallData.restaurant_id,
     name: lunchCallData.order_name,
     item: lunchCallData.order_item,
     mods: lunchCallData.order_mods,
   });
 
-  console.log({ newOrder });
-
-  await bot.replyPublic(message, 'Order created!');
+  await bot.replyPublic(message, `You chose the ${newOrder.name}!\n*${newOrder.item}*\n_${newOrder.mods}_`)
 }
 
 module.exports = { slackFeatures };
