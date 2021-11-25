@@ -18,7 +18,8 @@ const Order = mongoose.model(
     userId: String,
     restaurantId: String,
     name: String,
-    data: String,
+    item: String,
+    mods: String,
   }),
 );
 
