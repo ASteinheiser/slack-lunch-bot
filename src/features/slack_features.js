@@ -1,9 +1,11 @@
-const { Restaurant, Blacklist } = require('../models');
+const { Restaurant, Blacklist, Order } = require('../models');
 const {
   enterLunchPick,
   enterLunchMenuLink,
   enterDueTime,
   enterLunchOrder,
+  enterLunchOrderMods,
+  enterLunchOrderName,
 } = require('./slack_message_prompts');
 
 require('dotenv').config();
@@ -48,6 +50,16 @@ function slackFeatures(controller) {
         await sendLunchCallDMs(bot, lunchCallData.restaurant_id);
 
         return lunchCallData = {};
+      case 'order_item':
+        return await enterLunchOrderMods(bot, message);
+      case 'order_mods':
+        return await enterLunchOrderName(bot, message);
+      case 'order_name':
+        return await createOrder(bot, message, lunchCallData);
+      case 'order_choice':
+        const orderData = JSON.parse(incoming.selected_option.value);
+
+        return await bot.replyPublic(message, `You chose the ${orderData.name}!\n*${orderData.item}*\n_${orderData.mods}_`)
     }
   });
 }
@@ -124,5 +136,23 @@ const sendLunchCallDMs = async (bot, restaurantId) => {
 
   await enterLunchOrder(bot, restaurantId, activeUsers);
 };
+
+const createOrder = async (bot, message, lunchCallData) => {
+  if (await Order.findOne({ name: lunchCallData.order_name })) {
+    return await bot.replyPublic(message, 'Order with that name already exists');
+  }
+  const newOrder = await Order.create({
+    userId: message.user,
+    // TODO: fix this... somehow pass the restaurant id :shrug:
+    restaurantId: '',
+    name: lunchCallData.order_name,
+    item: lunchCallData.order_item,
+    mods: lunchCallData.order_mods,
+  });
+
+  console.log({ newOrder });
+
+  await bot.replyPublic(message, 'Order created!');
+}
 
 module.exports = { slackFeatures };
