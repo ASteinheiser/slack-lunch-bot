@@ -15,7 +15,7 @@ function slackFeatures(controller) {
   controller.on('slash_command', async (bot, message) => {
     switch(message.text) {
       case 'help':
-        return await bot.replyPublic(message, 'Hey there :wink:\nYou can "schedule" a lunch order with `/lunchbot schedule`!\nOr `/subscribe` and `/unsubscribe` to lunch call');
+        return await bot.replyPublic(message, 'Hey there :wink:\nTo use me, try `/lunchbot <command>`\n\nYou can `schedule` a lunch order\nOr `subscribe` and `unsubscribe` to lunch call');
       case 'schedule':
         return await enterLunchPick(bot, message);
       case 'subscribe':
