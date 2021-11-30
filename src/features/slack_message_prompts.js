@@ -174,7 +174,7 @@ const enterLunchOrder = async (bot, restaurantId, activeUsers) => {
           'element': { 'type': 'plain_text_input' },
           'label': {
             'type': 'plain_text',
-            'text': 'Order item (modifications will come next)',
+            'text': 'Menu item (modifications will come next)',
           },
           'dispatch_action': true
         }
