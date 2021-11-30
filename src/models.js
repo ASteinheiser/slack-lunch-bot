@@ -34,7 +34,6 @@ const Order = mongoose.model(
     restaurantId: String,
     name: String,
     item: String,
-    mods: String,
   }),
 );
 
