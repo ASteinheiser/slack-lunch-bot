@@ -18,6 +18,9 @@ function slackFeatures(controller) {
         return await bot.replyPublic(message, "Hey there :wink:\nI'm here to help you manage team lunch!\n\nUsage: `/lunchbot <command>`\n\n`schedule`: Create a new lunch call\n`cancel`: Cancel a lunch call\n`order`: Manually add your order to a lunch call\n`subscribe`: Get notified for lunch call\n`unsubscribe`: Stop getting notified for lunch call\n`stats`: See stats about lunch calls\n`help`: See this menu again");
       case 'schedule':
         return await enterLunchPick(bot, message);
+      case 'submit':
+        // TODO: implement this
+        return await bot.replyPublic(message, 'Sorry, I haven\'t implemented this feature yet :sweat_smile:');
       case 'cancel':
         // TODO: implement this
         return await bot.replyPublic(message, 'Sorry, I haven\'t implemented this feature yet :sweat_smile:');
