@@ -53,11 +53,13 @@ function slackFeatures(controller) {
       case 'order_mods':
         return await enterLunchOrderName(bot, message);
       case 'order_name':
-        return await createOrder(bot, message, lunchCallData);
+        const newOrder = await createOrder(message, lunchCallData);
+
+        return await notifyOrderPlaced(bot, message, newOrder);
       case 'order_choice':
         const orderData = JSON.parse(incoming.selected_option.value);
 
-        return await confirmOrderPlaced(bot, message, orderData);
+        return await notifyOrderPlaced(bot, message, orderData);
     }
   });
 }
@@ -135,22 +137,20 @@ const sendLunchCallDMs = async (bot, restaurantId) => {
   await enterLunchOrder(bot, restaurantId, activeUsers);
 };
 
-const createOrder = async (bot, message, lunchCallData) => {
+const createOrder = async (message, lunchCallData) => {
   const existingOrder = await Order.findOne({ name: lunchCallData.order_name });
   if (existingOrder) await existingOrder.delete();
 
-  const newOrder = await Order.create({
+  return await Order.create({
     userId: message.user,
     restaurantId: lunchCallData.restaurant_id,
     name: lunchCallData.order_name,
     item: lunchCallData.order_item,
     mods: lunchCallData.order_mods,
   });
-
-  return await confirmOrderPlaced(bot, message, newOrder);
 }
 
-const confirmOrderPlaced = async (bot, message, { name, item, mods }) => {
+const notifyOrderPlaced = async (bot, message, { name, item, mods }) => {
   await bot.replyPublic(message, `You chose the ${name}!\n*${item}*${mods ? `\n_${mods}_` : ''}`);
 }
 
