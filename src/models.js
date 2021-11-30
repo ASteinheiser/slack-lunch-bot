@@ -4,6 +4,21 @@ require('dotenv').config();
 
 mongoose.connect(process.env.MONGO_URI || '');
 
+const TeamLunch = mongoose.model(
+  'TeamLunch',
+  new mongoose.Schema({
+    date: Date,
+    restaurantName: String,
+    orders: [
+      new mongoose.Schema({
+        userId: String,
+        userName: String,
+        item: String,
+      }),
+    ],
+  }),
+);
+
 const Restaurant = mongoose.model(
   'Restaurant',
   new mongoose.Schema({
@@ -30,4 +45,4 @@ const Blacklist = mongoose.model(
   }),
 );
 
-module.exports = { Restaurant, Order, Blacklist };
+module.exports = { TeamLunch, Restaurant, Order, Blacklist };
