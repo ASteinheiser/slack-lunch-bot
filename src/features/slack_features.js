@@ -4,7 +4,6 @@ const {
   enterLunchMenuLink,
   enterDueTime,
   enterLunchOrder,
-  enterLunchOrderMods,
   enterLunchOrderName,
 } = require('./slack_message_prompts');
 
@@ -61,8 +60,6 @@ function slackFeatures(controller) {
         await bot.replyPublic(message, `:hamburger: The lunch pick is ${lunchCallData.restaurant_name} (${lunchCallData.restaurant_menu})\n:hourglass: Please submit orders by ${formattedTime}!`);
         return await sendLunchCallDMs(bot, lunchCallData.restaurant_id);
       case 'order_item':
-        return await enterLunchOrderMods(bot, message);
-      case 'order_mods':
         return await enterLunchOrderName(bot, message);
       case 'order_name':
         const newOrder = await createOrder(message, lunchCallData);
@@ -158,12 +155,11 @@ const createOrder = async (message, lunchCallData) => {
     restaurantId: lunchCallData.restaurant_id,
     name: lunchCallData.order_name,
     item: lunchCallData.order_item,
-    mods: lunchCallData.order_mods,
   });
 }
 
-const notifyOrderPlaced = async (bot, message, { name, item, mods }) => {
-  await bot.replyPublic(message, `You chose the ${name}!\n*${item}*${mods ? `\n_${mods}_` : ''}`);
+const notifyOrderPlaced = async (bot, message, { name, item }) => {
+  await bot.replyPublic(message, `You chose the ${name}!\n*${item}*`);
 }
 
 module.exports = { slackFeatures };
