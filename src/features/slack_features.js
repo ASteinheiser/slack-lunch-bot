@@ -57,7 +57,7 @@ function slackFeatures(controller) {
       case 'order_choice':
         const orderData = JSON.parse(incoming.selected_option.value);
 
-        return await bot.replyPublic(message, `You chose the ${orderData.name}!\n*${orderData.item}*\n_${orderData.mods}_`)
+        return await confirmOrderPlaced(bot, message, orderData);
     }
   });
 }
@@ -66,13 +66,13 @@ const subscribeToLunchCall = async (bot, message) => {
   try {
     const blacklist = await Blacklist.findOne({ userId: message.user_id });
     if (!blacklist) {
-      return bot.replyPublic(message, 'You are already subscribed to lunch call');
+      return bot.replyPublic(message, 'You are already subscribed to lunch call :thumbsup:');
     }
     await Blacklist.deleteOne({ userId: message.user_id });
-    return bot.replyPublic(message, 'Subscribed to lunch call :)');
+    return bot.replyPublic(message, 'Subscribed to lunch call :)\nYou may `unsubscribe` at any time');
   } catch (err) {
     console.log(err);
-    return bot.replyPublic(message, 'Hmm... something bad happened, try again');
+    return bot.replyPublic(message, 'Hmm... something bad happened, try again :shrug:');
   }
 }
 
@@ -80,19 +80,19 @@ const unsubscribeToLunchCall = async (bot, message) => {
   try {
     const blacklist = await Blacklist.findOne({ userId: message.user_id });
     if (blacklist) {
-      return bot.replyPublic(message, 'You are already unsubscribed');
+      return bot.replyPublic(message, 'You are already unsubscribed :thumbsup:');
     }
     await Blacklist.create({ userId: message.user_id });
-    return bot.replyPublic(message, 'You got it! No longer subscribed to lunch call');
+    return bot.replyPublic(message, 'You got it! No longer subscribed to lunch call :)\nYou may `subscribe` at any time');
   } catch (err) {
     console.log(err);
-    return bot.replyPublic(message, 'Hmm... something bad happened, try again');
+    return bot.replyPublic(message, 'Hmm... something bad happened, try again :shrug:');
   }
 }
 
 const createRestaurant = async (bot, message, lunchCallData) => {
   if (await Restaurant.findOne({ name: lunchCallData.restaurant_name })) {
-    return await bot.replyPublic(message, 'Restaurant already exists');
+    return await bot.replyPublic(message, 'Oops! Looks like that restaurant already exists...\nPlease try selecting it from the dropdown next time!');
   }
   const newRestaurant = await Restaurant.create({
     name: lunchCallData.restaurant_name,
@@ -147,7 +147,11 @@ const createOrder = async (bot, message, lunchCallData) => {
     mods: lunchCallData.order_mods,
   });
 
-  await bot.replyPublic(message, `You chose the ${newOrder.name}!\n*${newOrder.item}*\n_${newOrder.mods}_`)
+  return await confirmOrderPlaced(bot, message, newOrder);
+}
+
+const confirmOrderPlaced = async (bot, message, { name, item, mods }) => {
+  await bot.replyPublic(message, `You chose the ${name}!\n*${item}*${mods ? `\n_${mods}_` : ''}`);
 }
 
 module.exports = { slackFeatures };
