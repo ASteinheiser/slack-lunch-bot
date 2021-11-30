@@ -71,7 +71,7 @@ const subscribeToLunchCall = async (bot, message) => {
       return bot.replyPublic(message, 'You are already subscribed to lunch call :thumbsup:');
     }
     await Blacklist.deleteOne({ userId: message.user_id });
-    return bot.replyPublic(message, 'Subscribed to lunch call :)\nYou may `unsubscribe` at any time');
+    return bot.replyPublic(message, 'Subscribed to lunch call :slightly_smiling_face:\nYou may `unsubscribe` at any time');
   } catch (err) {
     console.log(err);
     return bot.replyPublic(message, 'Hmm... something bad happened, try again :shrug:');
@@ -85,7 +85,7 @@ const unsubscribeToLunchCall = async (bot, message) => {
       return bot.replyPublic(message, 'You are already unsubscribed :thumbsup:');
     }
     await Blacklist.create({ userId: message.user_id });
-    return bot.replyPublic(message, 'You got it! No longer subscribed to lunch call :)\nYou may `subscribe` at any time');
+    return bot.replyPublic(message, 'No longer subscribed to lunch call :slightly_smiling_face:\nYou may `subscribe` at any time');
   } catch (err) {
     console.log(err);
     return bot.replyPublic(message, 'Hmm... something bad happened, try again :shrug:');
