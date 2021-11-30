@@ -124,7 +124,7 @@ const enterLunchOrder = async (bot, restaurantId, activeUsers) => {
         'type': 'plain_text',
         'text': order.name
       },
-      'value': JSON.stringify({ name: order.name, item: order.item, mods: order.mods }),
+      'value': JSON.stringify({ name: order.name, item: order.item }),
     }));
 
     let orderSelect = {
@@ -174,7 +174,7 @@ const enterLunchOrder = async (bot, restaurantId, activeUsers) => {
           'element': { 'type': 'plain_text_input' },
           'label': {
             'type': 'plain_text',
-            'text': 'Menu item (modifications will come next)',
+            'text': 'Menu item',
           },
           'dispatch_action': true
         }
@@ -182,30 +182,6 @@ const enterLunchOrder = async (bot, restaurantId, activeUsers) => {
     }));
   });
   await Promise.all(promises);
-}
-
-const enterLunchOrderMods = async (bot, message) => {
-  await bot.replyPublic(message, {
-    blocks: [
-      {
-        'type': 'section',
-        'text': {
-          'type': 'mrkdwn',
-          'text': '*Would you like any modifications?*'
-        },
-      },
-      {
-        'type': 'input',
-        'block_id': 'order_mods',
-        'element': { 'type': 'plain_text_input' },
-        'label': {
-          'type': 'plain_text',
-          'text': 'Order modifications',
-        },
-        'dispatch_action': true
-      }
-    ]
-  });
 }
 
 const enterLunchOrderName = async (bot, message) => {
@@ -237,6 +213,5 @@ module.exports = {
   enterLunchMenuLink,
   enterDueTime,
   enterLunchOrder,
-  enterLunchOrderMods,
   enterLunchOrderName,
 };
